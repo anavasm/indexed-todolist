@@ -1,0 +1,19 @@
+{
+  "name": "indexed-todolist",
+  "description": "Webcomponent indexed-todolist following open-wc recommendations",
+  "license": "MIT",
+  "author": "indexed-todolist",
+  "version": "0.0.0",
+  "scripts": {
+    "analyze": "cem analyze --litelement",
+    "start": "web-dev-server"
+  },
+  "dependencies": {
+    "lit": "^2.0.0-rc.4"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.4.17",
+    "@web/dev-server": "^0.1.22"
+  },
+  "customElements": "custom-elements.json"
+}
