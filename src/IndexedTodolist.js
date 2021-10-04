@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'lit';
+import Store from './store/store.js';
 import './components/TodoInput.js';
 import './components/TodoList.js';
 
@@ -57,10 +58,17 @@ export class IndexedTodolist extends LitElement {
 
   constructor() {
     super();
-    this.todos = [
-      { completed: true, text: 'Uno' },
-      { completed: false, text: 'Dos' },
-    ];
+    this.todos = [];
+  }
+
+  async firstUpdated() {
+    try {
+      this.db = await new Store();
+      const todos = await this.db.getAll();
+      this.todos = todos;
+    } catch(error) {
+      console.error(error);
+    }
   }
 
   render() {
@@ -89,19 +97,37 @@ export class IndexedTodolist extends LitElement {
       completed: false,
       text: detail,
     };
-    this.todos = [...this.todos, newTodo];
+
+    this.db.set(newTodo)
+    .then((key) => {
+      this.todos = [...this.todos, { key, ...newTodo}];
+    })
+    .catch((err) => console.error('Error', error));
   }
 
-  onTodoComplete({ detail }) {
-    this.todos = this.todos.map((todo, index) => {
-      if (index === detail.index) {
-        return { ...todo, completed: detail.completed };
-      }
-      return todo;
-    });
+  async onTodoComplete({ detail }) {
+    try {
+      this.todos = this.todos.map((todo, index) => {
+        if (index === detail.index) {
+          return { ...todo, completed: detail.completed };
+        }
+        return todo;
+      });
+
+      const { key, ...values } = this.todos[detail.index];
+      await this.db.update(key, values);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  onTodoDelete({ detail }) {
-    this.todos = this.todos.filter((todo, index) => index !== detail.index);
+  async onTodoDelete({ detail }) {
+    try {
+      await this.db.delete(this.todos[detail.index]?.key);
+
+      this.todos = this.todos.filter((todo, index) => index !== detail.index);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
